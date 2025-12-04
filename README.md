@@ -1,2 +1,373 @@
-# web-client
-deckco
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>NAK NO HACK HUB | Roblox Client</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* --- CẤU HÌNH CƠ BẢN --- */
+        :root {
+            --primary-color: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --neon-glow: 0 0 10px rgba(0, 242, 254, 0.6), 0 0 20px rgba(79, 172, 254, 0.4);
+            --discord-glow: 0 0 8px rgba(88, 101, 242, 0.8), 0 0 15px rgba(88, 101, 242, 0.5);
+            --blue-light: #00f2fe;
+            --blue-dark: #4facfe;
+            --btn-color: #00273b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            /* Dùng font Pixel Art */
+            font-family: 'Press Start 2P', cursive;
+            background-image: url('https://i.pinimg.com/736x/14/0c/8c/140c8ce5da38f7586854ba4690372359.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--primary-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        /* --- BONG BÓNG NỀN (Giữ nguyên) --- */
+        .bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 50%;
+            animation: rise 15s infinite ease-in;
+            filter: blur(0.2px);
+        }
+        @keyframes rise {
+            0% { bottom: -120px; transform: translateX(0) scale(0.95); opacity: 0.9; }
+            50% { transform: translateX(40px) scale(1); opacity: 0.95; }
+            100% { bottom: 120%; transform: translateX(-40px) scale(1.05); opacity: 0; }
+        }
+
+        /* --- CONTAINER CHÍNH & HEADER --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.5rem; /* Điều chỉnh cỡ chữ cho font Pixel Art */
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(79, 172, 254, 1), 0 0 30px rgba(0, 242, 254, 0.8);
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+
+        /* Rất quan trọng: Font Pixel Art cần cỡ chữ nhỏ cho các thành phần chữ thường */
+        .subtitle, .member-count, .server-info, .client-note, .client-name, .btn-play, .server-cta, .footer {
+            font-size: 0.8rem; 
+            line-height: 1.6;
+        }
+
+        .subtitle {
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        /* --- KHU VỰC DISCORD SERVER (2 khung) --- */
+        .server-stats {
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+            margin-bottom: 44px;
+            flex-wrap: wrap;
+        }
+
+        .server-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(88, 101, 242, 0.6);
+            border-radius: 12px; /* Giảm bo góc kiểu Pixel Art */
+            padding: 25px 34px;
+            min-width: 280px;
+            max-width: 380px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 15px rgba(88, 101, 242, 0.7), 0 14px 40px rgba(2, 8, 30, 0.4);
+            text-decoration: none;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .server-box:hover {
+            transform: translateY(-8px) scale(1.03);
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 25px rgba(88, 101, 242, 1), 0 22px 60px rgba(2, 8, 30, 0.6);
+        }
+
+        .server-name {
+            font-family: 'Press Start 2P', cursive;
+            font-weight: 800;
+            font-size: 1.2rem; /* Điều chỉnh cỡ chữ cho font Pixel Art */
+            margin-bottom: 4px;
+            color: #fff;
+            text-shadow: var(--discord-glow);
+        }
+
+        .member-count {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--blue-light);
+            text-shadow: 0 0 8px rgba(0, 242, 254, 0.6);
+        }
+
+        .server-cta {
+            display: inline-block;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            padding: 10px 30px;
+            border-radius: 999px;
+            font-weight: 800;
+            color: var(--btn-color);
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+            /* Font size được kế thừa từ .subtitle */
+        }
+
+        /* --- CHÚ THÍCH 1000 SCRIPT (Khung đã chỉnh sửa) --- */
+        .client-note {
+            max-width: 650px; 
+            margin: 0 auto 30px auto;
+            font-weight: 800;
+            padding: 15px 25px;
+            border-radius: 12px; /* Bo góc kiểu Pixel Art */
+            
+            /* Background Gradient nhẹ */
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.15) 0%, rgba(0, 242, 254, 0.1) 100%);
+            backdrop-filter: blur(5px);
+            
+            /* Viền và Hiệu ứng Phát sáng Mạnh */
+            border: 2px solid var(--blue-light);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.8), 0 0 30px rgba(79, 172, 254, 0.5); 
+            
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0, 242, 254, 0.5);
+        }
+
+        /* --- DANH SÁCH CLIENT (GRID) --- */
+        .client-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            padding-bottom: 50px;
+        }
+
+        .client-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 242, 254, 0.5);
+            border-radius: 8px; /* Giảm bo góc kiểu Pixel Art */
+            padding: 12px;
+            transition: all 0.28s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--neon-glow);
+        }
+
+        .client-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 1), 0 8px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(0, 242, 254, 1);
+        }
+
+        .client-img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 8px; /* Giảm bo góc kiểu Pixel Art */
+            margin-bottom: 10px;
+            object-fit: cover;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .client-name { 
+            font-weight: 800; 
+            margin-bottom: 8px; 
+            color: var(--blue-light); 
+            text-shadow: 0 0 5px rgba(0, 242, 254, 0.7);
+            /* Font size được kế thừa từ .subtitle */
+        }
+
+        .btn-play {
+            margin-top: auto;
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-weight: 800;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+            color: var(--btn-color);
+            text-decoration: none;
+            /* Font size được kế thừa từ .subtitle */
+        }
+
+        /* Responsive cho Mobile */
+        @media (max-width: 720px) {
+            h1 { font-size: 1.8rem; }
+            /* Cần làm chữ nhỏ hơn trên mobile */
+            .subtitle, .member-count, .server-info, .client-note, .client-name, .btn-play, .server-cta, .footer {
+                font-size: 0.6rem; 
+            }
+            .server-box { min-width: 100%; padding: 20px; }
+            .server-name { font-size: 1rem; }
+            .client-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bubbles">
+        <div class="bubble" style="width:20px; height:20px; left:10%; animation-duration:9s;"></div>
+        <div class="bubble" style="width:30px; height:30px; left:28%; animation-duration:13s; animation-delay:2s;"></div>
+        <div class="bubble" style="width:15px; height:15px; left:60%; animation-duration:10s; animation-delay:1s;"></div>
+        <div class="bubble" style="width:25px; height:25px; left:80%; animation-duration:14s; animation-delay:4s;"></div>
+        <div class="bubble" style="width:40px; height:40px; left:45%; animation-duration:18s; animation-delay:3s;"></div>
+    </div>
+
+    <div class="container">
+        <h1>NAK NO HACK HUB</h1>
+        <p class="subtitle">Khám phá sức mạnh **Roblox Client** dưới đáy đại dương — Cập nhật mới nhất trên Discord</p>
+
+        <div class="server-stats">
+            <a href="https://discord.gg/DxHFtbn6aX" target="_blank" class="server-box discord-box" aria-label="Nhà trẻ SUN Discord">
+                <span class="server-name">Nhà trẻ SUN</span>
+                <span class="member-count" id="sun-members">1.752 thành viên</span>
+                <span class="server-info">Cộng đồng VIP</span>
+                <span class="server-cta">Tham gia VIP</span>
+            </a>
+
+            <a href="https://discord.gg/CJbpkPC4KJ" target="_blank" class="server-box discord-box" aria-label="Nhoi X Nak Discord">
+                <span class="server-name">Nhoi X Nak</span>
+                <span class="member-count" id="nak-members">6.981 thành viên</span>
+                <span class="server-info">Cộng đồng Public</span>
+                <span class="server-cta">Tham gia ngay</span>
+            </a>
+        </div>
+        
+        <div class="client-note">
+            🎉 **Update:** AI MUỐN CÀY THUÊ THÌ VÀO DISCORD ĐẶT NHÉ !!!!!
+        </div>
+
+        <div class="client-grid">
+            
+            <a href="https://link-delta.com" class="client-card" target="_blank" rel="noopener">
+                <img src="https://via.placeholder.com/300x170/87CEEB/ffffff?text=Delta" class="client-img" alt="Delta Client">
+                <div class="client-name">Delta Client</div>
+                <div class="btn-play">GET KEY</div>
+            </a>
+
+            <a href="https://link-fluxus-1.com" class="client-card" target="_blank" rel="noopener">
+                <img src="https://via.placeholder.com/300x170/4682B4/ffffff?text=Fluxus" class="client-img" alt="Fluxus">
+                <div class="client-name">Fluxus</div>
+                <div class="btn-play">GET KEY</div>
+            </a>
+
+            <a href="https://link-fluxus-2.com" class="client-card">
+                <img src="https://via.placeholder.com/300x170/5F9EA0/ffffff?text=Fluxus" class="client-img" alt="Fluxus">
+                <div class="client-name">Fluxus</div>
+                <div class="btn-play">GET KEY</div>
+            </a>
+
+            <a href="https://link-hydrogen.com" class="client-card">
+                <img src="https://via.placeholder.com/300x170/00CED1/ffffff?text=Hydrogen" class="client-img" alt="Hydrogen">
+                <div class="client-name">Hydrogen</div>
+                <div class="btn-play">GET KEY</div>
+            </a>
+
+            <a href="https://link-higon.com" class="client-card">
+                <img src="https://via.placeholder.com/300x170/B0E0E6/ffffff?text=Higon+Evo" class="client-img" alt="Higon Evo">
+                <div class="client-name">Higon Evo</div>
+                <div class="btn-play">GET KEY</div>
+            </a>
+
+            <a href="https://link-delta-2.com" class="client-card">
+                <img src="https://via.placeholder.com/300x170/ADD8E6/ffffff?text=Delta" class="client-img" alt="Delta Client">
+                <div class="client-name">Delta Client</div>
+                <div class="btn-play">GET KEY</div>
+            </a>
+
+            <a href="https://link-delta-3.com" class="client-card">
+                <img src="https://via.placeholder.com/300x170/87CEFA/ffffff?text=Delta" class="client-img" alt="Delta Client">
+                <div class="client-name">Delta Client</div>
+                <div class="btn-play">GET KEY</div>
+            </a>
+
+            <a href="https://link-trigon-tan.com" class="client-card">
+                <img src="https://via.placeholder.com/300x170/00BFFF/ffffff?text=Trigon+tan" class="client-img" alt="Trigon tan">
+                <div class="client-name">Trigon tan</div>
+                <div class="btn-play">GET KEY</div>
+            </a>
+
+            <a href="https://link-origen-evo.com" class="client-card">
+                <img src="https://via.placeholder.com/300x170/1E90FF/ffffff?text=Origen+Evo" class="client-img" alt="Origen Evo">
+                <div class="client-name">Origen Evo</div>
+                <div class="btn-play">GET KEY</div>
+            </a>
+
+            <a href="https://link-trigon-evo-1.com" class="client-card">
+                <img src="https://via.placeholder.com/300x170/6495ED/ffffff?text=Trigon+Evo" class="client-img" alt="Trigon Evo">
+                <div class="client-name">Trigon Evo</div>
+                <div class="btn-play">START</div>
+            </a>
+
+            <a href="https://link-trigon-evo-2.com" class="client-card">
+                <img src="https://via.placeholder.com/300x170/7B68EE/ffffff?text=Trigon+Evo" class="client-img" alt="Trigon Evo">
+                <div class="client-name">Trigon Evo</div>
+                <div class="btn-play">START</div>
+            </a>
+
+            <a href="https://link-delta-4.com" class="client-card">
+                <img src="https://via.placeholder.com/300x170/4169E1/ffffff?text=Delta" class="client-img" alt="Delta Client">
+                <div class="client-name">Delta Client</div>
+                <div class="btn-play">START</div>
+            </a>
+
+        </div>
+        <div class="footer">
+            Designed for Roblox Community | NAK NO HACK Theme
+        </div>
+    </div>
+
+    <script>
+        // HÀM GIẢ LẬP CẬP NHẬT SỐ THÀNH VIÊN
+        function updateMemberCounts() {
+            // Số thành viên GIẢ LẬP (Mock data)
+            const sunBase = 1752;
+            const nakBase = 4981;
+            
+            const sunMemberCount = sunBase + Math.floor(Math.random() * 50) - 25; 
+            const nakMemberCount = nakBase + Math.floor(Math.random() * 100) - 50; 
+
+            document.getElementById('sun-members').textContent = sunMemberCount.toLocaleString('en-US') + ' thành viên';
+            document.getElementById('nak-members').textContent = nakMemberCount.toLocaleString('en-US') + ' thành viên';
+        }
+
+        // Chạy lần đầu
+        updateMemberCounts();
+
+        // Chạy lại mỗi 2 giây (2000ms) để thấy hiệu ứng cập nhật số liệu.
+        setInterval(updateMemberCounts, 2000); 
+    </script>
+
+</body>
+</html>
